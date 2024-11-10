@@ -8,7 +8,7 @@ import { Status } from '../enum/status.enum';
 
 @Injectable({ providedIn: 'root'})
 export class ServerService {
-  private readonly apiUrl= 'http://localhost:8081/server';
+  private readonly apiUrl= 'http://localhost:8080/server';
   constructor(private http: HttpClient) { }
   servers$=<Observable<CustumResponse>>this.http.get<CustumResponse>(`${this.apiUrl}/list`)
   .pipe(
