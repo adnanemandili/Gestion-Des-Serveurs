@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  DB:
+    image: mysql:latest
+    container_name: mysql-DB-container
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin123
+      - MYSQL_DATABASE=serversdb
+      - MYSQL_USER=testuser
+      - MYSQL_PASSWORD=testuser@123
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  servermanager-backend-docker-container:
+    image: adnanemandili/servermanger:v1.1
+    container_name: servermanger-container-backend
+    ports:
+      - "8081:8081"
+    build:
+      context: ../ServerManger
+      dockerfile: Dockerfile
+    depends_on:
+      DB:
+        condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://DB:3306/serversdb
+      - SPRING_DATASOURCE_USERNAME=testuser
+      - SPRING_DATASOURCE_PASSWORD=testuser@123
+    volumes:
+      - ../images:/usr/share/images 
+  
+  servermanager-frontend-docker-container:
+    image: adnanemandili/server:v1
+    container_name: servermanager-container-frontend
+    ports:
+      - "80:80"
+    build:
+      context: ../Server  # Adjust to the path where your frontend code is
+      dockerfile: Dockerfile
+    depends_on:
+      - servermanager-backend-docker-container
